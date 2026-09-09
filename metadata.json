@@ -1,16 +1,34 @@
 {
   "name": "monero_wallet_cli",
   "version": "0.1.0",
-  "description": "Headless approver for monero_wallet_backend: shows every built transaction awaiting a decision over `logosctl watch`, and broadcasts or withdraws it over `logosctl call`.",
+  "description": "Headless Monero wallet for monero_wallet_backend: builds a send for review, shows the preview, and broadcasts or withdraws it over `logosctl call`; relays the reads. Holds the approver role, so a bare CLI (the host anchor) cannot broadcast.",
   "author": "Logos Core Team",
   "type": "core",
   "interface": "cdylib",
   "concurrency": "multi",
   "category": "wallet",
   "main": "monero_wallet_cli_plugin",
-  "dependencies": ["monero_wallet_backend"],
+  "dependencies": [
+    "monero_wallet_backend"
+  ],
   "include": [],
   "capabilities": [],
-  "codegen": { "rust": { "crate": "rust-lib", "trait": "MoneroWalletCliModule", "source": "src/glue.rs" } },
-  "nix": { "external_libraries": [], "packages": { "build": [], "runtime": [] }, "cmake": { "find_packages": [], "extra_include_dirs": [] } }
+  "codegen": {
+    "rust": {
+      "crate": "rust-lib",
+      "trait": "MoneroWalletCliModule",
+      "source": "src/glue.rs"
+    }
+  },
+  "nix": {
+    "external_libraries": [],
+    "packages": {
+      "build": [],
+      "runtime": []
+    },
+    "cmake": {
+      "find_packages": [],
+      "extra_include_dirs": []
+    }
+  }
 }
