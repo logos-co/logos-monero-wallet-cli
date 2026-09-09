@@ -1,0 +1,27 @@
+name: monero_wallet_cli — a headless approver reviews a Monero send over logosctl
+project_name: logos-monero-wallet-cli
+
+intro: |
+  A send is built for review and signed by the engine at build; only a configured approver may
+  broadcast it. `logosctl call monero_wallet_backend confirm_send …` is refused — the CLI is the
+  host anchor. `monero_wallet_cli` holds the role, shows every previewed send over
+  `logosctl watch`, and takes the decision over method calls.
+
+sections:
+  - title: "Build and start"
+    steps:
+      - run: |
+          nix build 'github:logos-co/logos-logoscore-cli{release}#cli-bundle-dir' --out-link ./logos
+          nix build 'path:..#install-portable' -o ./install
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"; rm -rf "$LOGOSCORE_CONFIG_DIR"; mkdir -p "$LOGOSCORE_CONFIG_DIR"
+          ./logos/bin/logoscore -m ./install/modules --persistence-path "$LOGOSCORE_CONFIG_DIR/data" daemon > daemon.log 2>&1 &
+          until grep -q 'Local client config' daemon.log; do sleep 1; done
+          ./logos/bin/logoscore load-module monero_wallet_cli; sleep 2
+          ./logos/bin/logoscore call monero_wallet_backend confirm_send s0
+          ./logos/bin/logoscore call monero_wallet_cli status
+        expect_contains: ['not authorized', '"held":false', 'configure']
+      - run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logoscore call monero_wallet_backend configure '{"approvers":["monero_wallet_ui","monero_wallet_cli"],"custodians":["monero_keys_ui"]}'
+          ./logos/bin/logoscore call monero_wallet_cli status; ./logos/bin/logoscore stop
+        expect_contains: ['"held":true']
