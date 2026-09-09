@@ -54,13 +54,27 @@ sections:
           ./logos/bin/logoscore call monero_wallet_cli receive_info 0
         expect_contains: ['\"state\\":\\"done\\"', '"address"']
 
+  - title: "Addresses are validated locally, before anything reaches the engine"
+    steps:
+      - run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          echo -n 'bogus: '; ./logos/bin/logoscore call monero_wallet_cli address_valid 5B8s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvUsFuHSGgE7X1cz85oc1LPZfLKtF8QU8kBcHRUApQaHfYHm
+          echo -n 'stagenet: '; ./logos/bin/logoscore call monero_wallet_cli address_valid 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY
+        expect_contains: ['bogus: ', 'false', 'stagenet: ', 'true']
+
   - title: "Approver: a transfer is built for review, and broadcast is a separate decision"
     steps:
-      - title: "A fresh wallet has no funds, so the engine refuses the build — its own words, not a role refusal"
+      - title: "A fresh wallet has no funds, so the engine refuses the BUILD — its own words, not a role refusal"
         run: |
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_cli transfer 5B8s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvUsFuHSGgE7X1cz85oc1LPZfLKtF8QU8kBcHRUApQaHfYHm str:0.001
+          ./logos/bin/logoscore call monero_wallet_cli transfer 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY str:0.001
+          for i in $(seq 1 30); do s=$(./logos/bin/logoscore call monero_wallet_cli send_status s1); echo "$s" | grep -qE 'previewed|failed' && break; sleep 2; done; echo "$s"
+        expect_contains: ['"requestId\\":\\"s1', 'not enough money']
+      - title: "confirm is refused by STATE, which is only reachable because the role IS held"
+        run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logoscore call monero_wallet_cli confirm s99
           ./logos/bin/logoscore call monero_wallet_cli list
           ./logos/bin/logoscore call monero_wallet_cli close_wallet
           ./logos/bin/logoscore stop
-        expect_contains: ['not enough money']
+        expect_contains: ['unknown requestId']
