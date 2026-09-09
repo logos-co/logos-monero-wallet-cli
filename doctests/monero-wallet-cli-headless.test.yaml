@@ -31,13 +31,13 @@ sections:
         expect_contains:
           - 'not authorized'
           - 'is not a configured custodian. Run: logosctl call monero_wallet_backend configure'
-          - '"held":false'
+          - '\"held\":false'
       - title: "Enrol it in both roles; one call, and the GUI keeps its own"
         run: |
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
           ./logos/bin/logoscore call monero_wallet_backend configure '{"approvers":["monero_wallet_ui","monero_wallet_cli"],"custodians":["monero_wallet_ui","monero_wallet_cli"]}'
           ./logos/bin/logoscore call monero_wallet_cli status
-        expect_contains: ['"held":true', '"custodian":true', '"approver":true']
+        expect_contains: ['\"held\":true', '\"custodian\":true', '\"approver\":true']
 
   - title: "Custodian: create a stagenet wallet and read it back"
     steps:
@@ -45,22 +45,27 @@ sections:
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
           ./logos/bin/logoscore call monero_wallet_cli set_active_network stagenet
           ./logos/bin/logoscore call monero_wallet_cli create_wallet doctest str:pw str:Doc
-        expect_contains: ['"jobId"']
+        expect_contains: ['\"jobId\"']
       - title: "The job settles and the wallet is open"
         run: |
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
           for i in $(seq 1 40); do s=$(./logos/bin/logoscore call monero_wallet_cli job_status b1); echo "$s" | grep -qE 'done|failed' && break; sleep 1; done; echo "$s"
           ./logos/bin/logoscore call monero_wallet_cli wallet_status
           ./logos/bin/logoscore call monero_wallet_cli receive_info 0
-        expect_contains: ['\"state\\":\\"done\\"', '"address"']
+        expect_contains: ['\"state\":\"done\"', '\"address\"']
 
   - title: "Addresses are validated locally, before anything reaches the engine"
     steps:
       - run: |
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          echo -n 'bogus: '; ./logos/bin/logoscore call monero_wallet_cli address_valid 5B8s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvUsFuHSGgE7X1cz85oc1LPZfLKtF8QU8kBcHRUApQaHfYHm
-          echo -n 'stagenet: '; ./logos/bin/logoscore call monero_wallet_cli address_valid 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY
-        expect_contains: ['bogus: ', 'false', 'stagenet: ', 'true']
+          # Bind each verdict to its address on ONE line: expect_contains is an unordered set of
+          # substrings, so bare 'false' and 'true' tokens would pass even if swapped.
+          # address_valid returns a real bool, so the reply is "result":false unquoted inside the
+          # envelope; pull just that field out so the verdict is bound to its address.
+          verdict() { ./logos/bin/logoscore call monero_wallet_cli address_valid "$1" | sed 's/.*"result"://; s/,.*//'; }
+          echo "bogus=$(verdict 5B8s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvUsFuHSGgE7X1cz85oc1LPZfLKtF8QU8kBcHRUApQaHfYHm)"
+          echo "stagenet=$(verdict 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY)"
+        expect_contains: ['bogus=false', 'stagenet=true']
 
   - title: "Approver: a transfer is built for review, and broadcast is a separate decision"
     steps:
@@ -69,7 +74,7 @@ sections:
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
           ./logos/bin/logoscore call monero_wallet_cli transfer 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY str:0.001
           for i in $(seq 1 30); do s=$(./logos/bin/logoscore call monero_wallet_cli send_status s1); echo "$s" | grep -qE 'previewed|failed' && break; sleep 2; done; echo "$s"
-        expect_contains: ['"requestId\\":\\"s1', 'not enough money']
+        expect_contains: ['\"requestId\":\"s1\"', 'not enough money']
       - title: "confirm is refused by STATE, which is only reachable because the role IS held"
         run: |
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
