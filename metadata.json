@@ -1,7 +1,7 @@
 {
   "name": "monero_wallet_cli",
   "version": "0.1.0",
-  "description": "Headless Monero wallet for monero_wallet_backend: builds a send for review, shows the preview, and broadcasts or withdraws it over `logosctl call`; relays the reads. Holds the approver role, so a bare CLI (the host anchor) cannot broadcast.",
+  "description": "Headless Monero wallet for monero_wallet_backend: open or create a wallet, read the balance and addresses, build a transfer, review it and broadcast or withdraw it, all over `logosctl call`. Holds the custodian and approver roles, so a bare CLI (the host anchor) can do none of it.",
   "author": "Logos Core Team",
   "type": "core",
   "interface": "cdylib",

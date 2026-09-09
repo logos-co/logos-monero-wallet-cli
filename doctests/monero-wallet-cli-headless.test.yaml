@@ -1,11 +1,11 @@
-name: monero_wallet_cli — a headless approver reviews a Monero send over logosctl
+name: monero_wallet_cli — a headless Monero wallet over logosctl, both roles in one session
 project_name: logos-monero-wallet-cli
 
 intro: |
-  A send is built for review and signed by the engine at build; only a configured approver may
-  broadcast it. `logosctl call monero_wallet_backend confirm_send …` is refused — the CLI is the
-  host anchor. `monero_wallet_cli` holds the role, shows every previewed send over
-  `logosctl watch`, and takes the decision over method calls.
+  One module covers a whole headless session: unlock is custodian, broadcast is approver, and
+  `logosctl call monero_wallet_backend …` is refused for both because the CLI authenticates as the
+  host anchor. `monero_wallet_cli` is a named module that holds the roles once an operator enrols
+  it — and until then, every refusal prints the exact `configure` that fixes it.
 
 sections:
   - title: "Build and start"
@@ -17,11 +17,50 @@ sections:
           ./logos/bin/logoscore -m ./install/modules --persistence-path "$LOGOSCORE_CONFIG_DIR/data" daemon > daemon.log 2>&1 &
           until grep -q 'Local client config' daemon.log; do sleep 1; done
           ./logos/bin/logoscore load-module monero_wallet_cli; sleep 2
+        expect_contains: ['"status":"ok"']
+
+  - title: "The host anchor is refused; so is the relay, until it is enrolled"
+    steps:
+      - title: "Both halves refused, and the relay names the fix"
+        run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logoscore call monero_wallet_backend open_wallet nope str:pw
           ./logos/bin/logoscore call monero_wallet_backend confirm_send s0
+          ./logos/bin/logoscore call monero_wallet_cli create_wallet doctest str:pw str:Doc
           ./logos/bin/logoscore call monero_wallet_cli status
-        expect_contains: ['not authorized', '"held":false', 'configure']
+        expect_contains:
+          - 'not authorized'
+          - 'is not a configured custodian. Run: logosctl call monero_wallet_backend configure'
+          - '"held":false'
+      - title: "Enrol it in both roles; one call, and the GUI keeps its own"
+        run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logoscore call monero_wallet_backend configure '{"approvers":["monero_wallet_ui","monero_wallet_cli"],"custodians":["monero_wallet_ui","monero_wallet_cli"]}'
+          ./logos/bin/logoscore call monero_wallet_cli status
+        expect_contains: ['"held":true', '"custodian":true', '"approver":true']
+
+  - title: "Custodian: create a stagenet wallet and read it back"
+    steps:
       - run: |
           export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_backend configure '{"approvers":["monero_wallet_ui","monero_wallet_cli"],"custodians":["monero_keys_ui"]}'
-          ./logos/bin/logoscore call monero_wallet_cli status; ./logos/bin/logoscore stop
-        expect_contains: ['"held":true']
+          ./logos/bin/logoscore call monero_wallet_cli set_active_network stagenet
+          ./logos/bin/logoscore call monero_wallet_cli create_wallet doctest str:pw str:Doc
+        expect_contains: ['"jobId"']
+      - title: "The job settles and the wallet is open"
+        run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          for i in $(seq 1 40); do s=$(./logos/bin/logoscore call monero_wallet_cli job_status b1); echo "$s" | grep -qE 'done|failed' && break; sleep 1; done; echo "$s"
+          ./logos/bin/logoscore call monero_wallet_cli wallet_status
+          ./logos/bin/logoscore call monero_wallet_cli receive_info 0
+        expect_contains: ['\"state\\":\\"done\\"', '"address"']
+
+  - title: "Approver: a transfer is built for review, and broadcast is a separate decision"
+    steps:
+      - title: "A fresh wallet has no funds, so the engine refuses the build — its own words, not a role refusal"
+        run: |
+          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logoscore call monero_wallet_cli transfer 5B8s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvUsFuHSGgE7X1cz85oc1LPZfLKtF8QU8kBcHRUApQaHfYHm str:0.001
+          ./logos/bin/logoscore call monero_wallet_cli list
+          ./logos/bin/logoscore call monero_wallet_cli close_wallet
+          ./logos/bin/logoscore stop
+        expect_contains: ['not enough money']
