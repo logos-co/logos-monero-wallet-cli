@@ -1,0 +1,59 @@
+name: monero_wallet_cli Unit Tests
+
+# The relay's refusal translation and the block a human reads before broadcasting, run on every
+# change. `--no-default-features` drops the logos_module glue (and the logos-rust-sdk path dep),
+# so this is plain cargo — no nix, no SDK build, no network beyond crates.io.
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cargo-test:
+    name: cargo test (pure core)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the pinned toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.89"
+
+      - name: Provide the SDK manifest cargo insists on resolving
+        # --no-default-features never COMPILES the SDK, but cargo still resolves the manifest of
+        # the optional path dep, and logos-rust-sdk-src is gitignored (the nix builder stages it).
+        uses: actions/checkout@v4
+        with:
+          repository: logos-co/logos-rust-sdk
+          path: logos-rust-sdk-src
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust-lib
+
+      - name: cargo test --no-default-features
+        run: cargo test --manifest-path rust-lib/Cargo.toml --no-default-features --locked
+
+      - name: The guards must actually be present
+        # A suite that silently stops compiling reads as coverage. These four are the ones a
+        # headless operator depends on: a refusal that names the exact `configure` that fixes
+        # it, a hint that grants without displacing the GUI, the scrub that keeps a password
+        # out of memory, and the review block that names the money.
+        run: |
+          set -euo pipefail
+          out=$(cargo test --manifest-path rust-lib/Cargo.toml --no-default-features --locked -- --list)
+          echo "$out"
+          for t in only_the_opaque_refusal_is_translated \
+                   the_hint_grants_both_roles_and_keeps_the_gui \
+                   the_hint_is_idempotent_and_can_grant_one_role \
+                   scrub_clears_the_bytes \
+                   the_block_names_the_money_and_the_two_commands; do
+            echo "$out" | grep -q "$t" || { echo "::error::MISSING guard test: $t"; exit 1; }
+          done
