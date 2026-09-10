@@ -11358,14 +11358,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1788927409,
-        "narHash": "sha256-XyjEKOSQzagSSpvmAa+AEBgDaXj15QwqKHArig0WcEw=",
-        "path": "/Users/dlipicar/repos/logos-monero-node-module",
-        "type": "path"
+        "lastModified": 1788927408,
+        "narHash": "sha256-gBgpVKZc6xejVv0tTcsH+vVkcs4fuoY3GNl/Iova15k=",
+        "owner": "logos-co",
+        "repo": "logos-monero-node-module",
+        "rev": "8ff66d08aa3d702921b94bbb99f7fb59863caa53",
+        "type": "github"
       },
       "original": {
-        "path": "/Users/dlipicar/repos/logos-monero-node-module",
-        "type": "path"
+        "owner": "logos-co",
+        "repo": "logos-monero-node-module",
+        "type": "github"
       }
     },
     "monero_wallet_backend": {
@@ -11377,14 +11380,17 @@
         "monero_wallet_core_module": "monero_wallet_core_module"
       },
       "locked": {
-        "lastModified": 1788979211,
-        "narHash": "sha256-F2G6VlI+tiEzmUX7TXxz6a1CCwEz7HJg9BTSexR8SI0=",
-        "path": "/Users/dlipicar/repos/logos-monero-wallet-backend",
-        "type": "path"
+        "lastModified": 1789007819,
+        "narHash": "sha256-c8ZAWiEpdznwxxz2iZrUU0GAFoj2Ame71abcrg8S2oc=",
+        "owner": "logos-co",
+        "repo": "logos-monero-wallet-backend",
+        "rev": "a7d45623af4b1187a4e433425b29146a6010c66f",
+        "type": "github"
       },
       "original": {
-        "path": "/Users/dlipicar/repos/logos-monero-wallet-backend",
-        "type": "path"
+        "owner": "logos-co",
+        "repo": "logos-monero-wallet-backend",
+        "type": "github"
       }
     },
     "monero_wallet_core_module": {
@@ -11400,14 +11406,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1788930544,
-        "narHash": "sha256-MynPaPxD+7oDhPZVsd31lHPCF5eijnzRfkjVLXjpF5A=",
-        "path": "/Users/dlipicar/repos/logos-monero-wallet-core-module",
-        "type": "path"
+        "lastModified": 1789007765,
+        "narHash": "sha256-/0mUhNToi/3fPGEXGmjZbPL6jaU/Qk1DbCI9clTZeFw=",
+        "owner": "logos-co",
+        "repo": "logos-monero-wallet-core-module",
+        "rev": "5f1b97fb8ed2001abada4047771edcfe285898eb",
+        "type": "github"
       },
       "original": {
-        "path": "/Users/dlipicar/repos/logos-monero-wallet-core-module",
-        "type": "path"
+        "owner": "logos-co",
+        "repo": "logos-monero-wallet-core-module",
+        "type": "github"
       }
     },
     "nix-bundle-appimage": {
