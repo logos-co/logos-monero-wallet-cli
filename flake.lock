@@ -11380,11 +11380,11 @@
         "monero_wallet_core_module": "monero_wallet_core_module"
       },
       "locked": {
-        "lastModified": 1789007819,
-        "narHash": "sha256-c8ZAWiEpdznwxxz2iZrUU0GAFoj2Ame71abcrg8S2oc=",
+        "lastModified": 1789677227,
+        "narHash": "sha256-d/s5WhFyyCXaaVt4IqXr7tR6M8N4HFF5Wj21+c27l6g=",
         "owner": "logos-co",
         "repo": "logos-monero-wallet-backend",
-        "rev": "a7d45623af4b1187a4e433425b29146a6010c66f",
+        "rev": "0d381bcca2a40c924d86388d143d1328f2f0a2d8",
         "type": "github"
       },
       "original": {
