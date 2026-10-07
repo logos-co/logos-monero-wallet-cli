@@ -9,7 +9,7 @@
   "category": "wallet",
   "main": "monero_wallet_cli_plugin",
   "dependencies": [
-    "monero_wallet_backend"
+    { "name": "monero_wallet_backend", "version": "~0.1.0" }
   ],
   "include": [],
   "capabilities": [],
