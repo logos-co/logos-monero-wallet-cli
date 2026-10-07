@@ -4330,6 +4330,66 @@
         "type": "github"
       }
     },
+    "logos-monero-nix": {
+      "inputs": {
+        "logos-nix": [
+          "monero_wallet_backend",
+          "monero_node_module",
+          "monerod_module",
+          "logos-module-builder",
+          "logos-nix"
+        ],
+        "nixpkgs": [
+          "monero_wallet_backend",
+          "monero_node_module",
+          "monerod_module",
+          "logos-module-builder",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791388275,
+        "narHash": "sha256-tu2Cc1Zf8QvrztCP8kRy3O16x2QpjJbLXDBzGXMyVkY=",
+        "owner": "logos-co",
+        "repo": "logos-monero-nix",
+        "rev": "5f7ee441d0e3b823b423117d18750352ab68b0ff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "logos-co",
+        "repo": "logos-monero-nix",
+        "type": "github"
+      }
+    },
+    "logos-monero-nix_2": {
+      "inputs": {
+        "logos-nix": [
+          "monero_wallet_backend",
+          "monero_wallet_core_module",
+          "logos-module-builder",
+          "logos-nix"
+        ],
+        "nixpkgs": [
+          "monero_wallet_backend",
+          "monero_wallet_core_module",
+          "logos-module-builder",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791388275,
+        "narHash": "sha256-tu2Cc1Zf8QvrztCP8kRy3O16x2QpjJbLXDBzGXMyVkY=",
+        "owner": "logos-co",
+        "repo": "logos-monero-nix",
+        "rev": "5f7ee441d0e3b823b423117d18750352ab68b0ff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "logos-co",
+        "repo": "logos-monero-nix",
+        "type": "github"
+      }
+    },
     "logos-nix": {
       "inputs": {
         "nixpkgs": "nixpkgs",
@@ -5566,25 +5626,6 @@
         "owner": "logos-co",
         "repo": "logos-nix",
         "rev": "6e0f4a7120fced10829b0b3a698ff619a11d4605",
-        "type": "github"
-      },
-      "original": {
-        "owner": "logos-co",
-        "repo": "logos-nix",
-        "type": "github"
-      }
-    },
-    "logos-nix_159": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_159",
-        "nixpkgs-windows": "nixpkgs-windows_145"
-      },
-      "locked": {
-        "lastModified": 1788889549,
-        "narHash": "sha256-7HylwQZ9ywzlwAqwBboJJkV0r4RhRvnLatQR+Yv8sdE=",
-        "owner": "logos-co",
-        "repo": "logos-nix",
-        "rev": "30285b1025f053b0adca39a6a5c94f93df0619e2",
         "type": "github"
       },
       "original": {
@@ -11355,14 +11396,15 @@
         "logos-module-builder": [
           "monero_wallet_backend",
           "logos-module-builder"
-        ]
+        ],
+        "monerod_module": "monerod_module"
       },
       "locked": {
-        "lastModified": 1788927408,
-        "narHash": "sha256-gBgpVKZc6xejVv0tTcsH+vVkcs4fuoY3GNl/Iova15k=",
+        "lastModified": 1791395777,
+        "narHash": "sha256-cyI5xkPIN7mLhDNb1KL16UX+gw/yt+aHVATwTylGz84=",
         "owner": "logos-co",
         "repo": "logos-monero-node-module",
-        "rev": "8ff66d08aa3d702921b94bbb99f7fb59863caa53",
+        "rev": "1bf8df7e5872f771bf5298287bb1a36866b8e7d5",
         "type": "github"
       },
       "original": {
@@ -11380,11 +11422,11 @@
         "monero_wallet_core_module": "monero_wallet_core_module"
       },
       "locked": {
-        "lastModified": 1789677227,
-        "narHash": "sha256-d/s5WhFyyCXaaVt4IqXr7tR6M8N4HFF5Wj21+c27l6g=",
+        "lastModified": 1791398995,
+        "narHash": "sha256-MlU7uH899e4Dts78dbWl6eLuzs/fY4U1toIAibBjGJc=",
         "owner": "logos-co",
         "repo": "logos-monero-wallet-backend",
-        "rev": "0d381bcca2a40c924d86388d143d1328f2f0a2d8",
+        "rev": "84234951573166d4a4ef2e3d7938cf1aa8fa8719",
         "type": "github"
       },
       "original": {
@@ -11399,23 +11441,46 @@
           "monero_wallet_backend",
           "logos-module-builder"
         ],
-        "logos-nix": "logos-nix_159",
+        "logos-monero-nix": "logos-monero-nix_2",
         "monero_node_module": [
           "monero_wallet_backend",
           "monero_node_module"
         ]
       },
       "locked": {
-        "lastModified": 1789007765,
-        "narHash": "sha256-/0mUhNToi/3fPGEXGmjZbPL6jaU/Qk1DbCI9clTZeFw=",
+        "lastModified": 1791397557,
+        "narHash": "sha256-fmulBrbPDvKPFD/LNp4XzbVPzIwcIdmUPNwvZHxSlWM=",
         "owner": "logos-co",
         "repo": "logos-monero-wallet-core-module",
-        "rev": "5f1b97fb8ed2001abada4047771edcfe285898eb",
+        "rev": "35f31f2390017b4c3cc83e6733bebc4270efcc04",
         "type": "github"
       },
       "original": {
         "owner": "logos-co",
         "repo": "logos-monero-wallet-core-module",
+        "type": "github"
+      }
+    },
+    "monerod_module": {
+      "inputs": {
+        "logos-module-builder": [
+          "monero_wallet_backend",
+          "monero_node_module",
+          "logos-module-builder"
+        ],
+        "logos-monero-nix": "logos-monero-nix"
+      },
+      "locked": {
+        "lastModified": 1791389791,
+        "narHash": "sha256-vqDkFYRkVY7+jjtwYRYtt9jEEuK+NZ2OO5h4TsdZNyY=",
+        "owner": "logos-co",
+        "repo": "logos-monerod-module",
+        "rev": "a980ed2483d8af1a7e0ef65dfb01cb1ee777f2ad",
+        "type": "github"
+      },
+      "original": {
+        "owner": "logos-co",
+        "repo": "logos-monerod-module",
         "type": "github"
       }
     },
@@ -13862,22 +13927,6 @@
       }
     },
     "nixpkgs-windows_144": {
-      "locked": {
-        "lastModified": 1782723713,
-        "narHash": "sha256-oPXCU/SSUokcGaJREHibG1CBX3+s/W7orDWQOZDsEeQ=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "b5aa0fbd538984f6e3d201be0005b4463d8b09f8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "b5aa0fbd538984f6e3d201be0005b4463d8b09f8",
-        "type": "github"
-      }
-    },
-    "nixpkgs-windows_145": {
       "locked": {
         "lastModified": 1782723713,
         "narHash": "sha256-oPXCU/SSUokcGaJREHibG1CBX3+s/W7orDWQOZDsEeQ=",
@@ -16406,22 +16455,6 @@
       }
     },
     "nixpkgs_158": {
-      "locked": {
-        "lastModified": 1759036355,
-        "narHash": "sha256-0m27AKv6ka+q270dw48KflE0LwQYrO7Fm4/2//KCVWg=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "e9f00bd893984bc8ce46c895c3bf7cac95331127",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_159": {
       "locked": {
         "lastModified": 1759036355,
         "narHash": "sha256-0m27AKv6ka+q270dw48KflE0LwQYrO7Fm4/2//KCVWg=",
