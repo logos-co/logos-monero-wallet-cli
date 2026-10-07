@@ -1,6 +1,6 @@
 {
   "name": "monero_wallet_cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Headless Monero wallet for monero_wallet_backend: open or create a wallet, read the balance and addresses, build a transfer, review it and broadcast or withdraw it, all over `logosctl call`. Holds the custodian and approver roles, so a bare CLI (the host anchor) can do none of it.",
   "author": "Logos Core Team",
   "type": "core",
@@ -9,7 +9,7 @@
   "category": "wallet",
   "main": "monero_wallet_cli_plugin",
   "dependencies": [
-    "monero_wallet_backend"
+    { "name": "monero_wallet_backend", "version": "~0.1.0" }
   ],
   "include": [],
   "capabilities": [],
