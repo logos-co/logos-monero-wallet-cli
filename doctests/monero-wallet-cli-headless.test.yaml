@@ -17,7 +17,7 @@ sections:
         # {release} to the commit under test with --release-for.
         run: |
           set -eu
-          nix build 'github:logos-co/logos-logoscore-cli{release}#cli-bundle-dir' --out-link ./logos
+          nix build 'github:logos-co/logos-logoscore-cli{release}#ctl-bundle-dir' --out-link ./logos
           nix build 'github:logos-co/logos-monero-node-module{release}#install-portable' --no-write-lock-file -o result-node
           nix build 'github:logos-co/logos-monero-wallet-core-module{release}#install-portable' --no-write-lock-file -o result-core
           nix build 'github:logos-co/logos-monero-wallet-backend{release}#install-portable' --no-write-lock-file -o result-backend
@@ -25,85 +25,83 @@ sections:
           mkdir -p tree/modules
           cp -rL result-node/modules/* result-core/modules/* result-backend/modules/* result-cli/modules/* tree/modules/
           chmod -R u+w tree
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"; rm -rf "$LOGOSCORE_CONFIG_DIR"; mkdir -p "$LOGOSCORE_CONFIG_DIR"
-          ./logos/bin/logoscore -m ./tree/modules --persistence-path "$LOGOSCORE_CONFIG_DIR/data" daemon > daemon.log 2>&1 &
-          for i in $(seq 1 60); do
-            if grep -q 'Local client config' daemon.log; then break; fi
-            sleep 1
-          done
-          ./logos/bin/logoscore load-module monero_wallet_cli
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"; rm -rf "$LOGOSCTL_CONFIG_DIR"; mkdir -p "$LOGOSCTL_CONFIG_DIR" home
+          printf 'modules_dirs: [%s]\n' "$PWD/tree/modules" | ./logos/bin/logosctl daemon config set - > /dev/null
+          HOME="$PWD/home" ./logos/bin/logosctl daemon start --detach
+          ./logos/bin/logosctl module load monero_wallet_cli
           sleep 2
         code_block: |
-          nix build 'github:logos-co/logos-logoscore-cli#cli-bundle-dir' --out-link ./logos
+          nix build 'github:logos-co/logos-logoscore-cli#ctl-bundle-dir' --out-link ./logos
           for m in node-module wallet-core-module wallet-backend wallet-cli; do
             nix build "github:logos-co/logos-monero-$m#install-portable" -o "result-$m"
           done
           mkdir -p tree/modules && cp -rL result-*/modules/* tree/modules/ && chmod -R u+w tree
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore -m ./tree/modules --persistence-path "$LOGOSCORE_CONFIG_DIR/data" daemon &
-          ./logos/bin/logoscore load-module monero_wallet_cli
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          printf 'modules_dirs: [%s]\n' "$PWD/tree/modules" | ./logos/bin/logosctl daemon config set - > /dev/null
+          ./logos/bin/logosctl daemon start --detach
+          ./logos/bin/logosctl module load monero_wallet_cli
         expect_contains: ['"status":"ok"']
 
   - title: "The host anchor is refused; so is the relay, until it is enrolled"
     steps:
       - title: "Both halves refused, and the relay names the fix"
         run: |
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_backend open_wallet nope str:pw
-          ./logos/bin/logoscore call monero_wallet_backend confirm_send s0
-          ./logos/bin/logoscore call monero_wallet_cli create_wallet doctest str:pw str:Doc
-          ./logos/bin/logoscore call monero_wallet_cli status
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logosctl call monero_wallet_backend open_wallet nope str:pw
+          ./logos/bin/logosctl call monero_wallet_backend confirm_send s0
+          ./logos/bin/logosctl call monero_wallet_cli create_wallet doctest str:pw str:Doc
+          ./logos/bin/logosctl call monero_wallet_cli status
         expect_contains:
           - 'not authorized'
           - 'is not a configured custodian. Run: logosctl call monero_wallet_backend configure'
           - '\"held\":false'
       - title: "Enrol it in both roles; one call, and the GUI keeps its own"
         run: |
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_backend configure '{"approvers":["monero_wallet_ui","monero_wallet_cli"],"custodians":["monero_wallet_ui","monero_wallet_cli"]}'
-          ./logos/bin/logoscore call monero_wallet_cli status
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logosctl call monero_wallet_backend configure '{"approvers":["monero_wallet_ui","monero_wallet_cli"],"custodians":["monero_wallet_ui","monero_wallet_cli"]}'
+          ./logos/bin/logosctl call monero_wallet_cli status
         expect_contains: ['\"held\":true', '\"custodian\":true', '\"approver\":true']
 
   - title: "Custodian: create a stagenet wallet and read it back"
     steps:
       - run: |
           set -eu
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_cli set_active_network stagenet
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logosctl call monero_wallet_cli set_active_network stagenet
           # wallet2 binds its daemon at init, so the node has to be reachable BEFORE the wallet
           # is created. A public node is somebody else's machine: try the seeded default, then
           # two alternates.
-          ./logos/bin/logoscore call monero_node_module init_defaults
-          health=$(./logos/bin/logoscore call monero_node_module node_health stagenet)
+          ./logos/bin/logosctl call monero_node_module init_defaults
+          health=$(./logos/bin/logosctl call monero_node_module node_health stagenet)
           case "$health" in
             *'\"reachable\":true'*) ;;
             *)
               for u in http://node3.monerodevs.org:38089 http://node.monerodevs.org:38089; do
-                ./logos/bin/logoscore call monero_node_module set_node_config stagenet "str:{\"url\":\"$u\"}"
-                health=$(./logos/bin/logoscore call monero_node_module node_health stagenet)
+                ./logos/bin/logosctl call monero_node_module set_node_config stagenet "str:{\"url\":\"$u\"}"
+                health=$(./logos/bin/logosctl call monero_node_module node_health stagenet)
                 case "$health" in *'\"reachable\":true'*) break;; esac
               done
               ;;
           esac
-          ./logos/bin/logoscore call monero_wallet_cli create_wallet doctest str:pw str:Doc
+          ./logos/bin/logosctl call monero_wallet_cli create_wallet doctest str:pw str:Doc
         expect_contains: ['\"jobId\"']
       - title: "The job settles and the wallet is open"
         run: |
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          for i in $(seq 1 40); do s=$(./logos/bin/logoscore call monero_wallet_cli job_status b1); echo "$s" | grep -qE 'done|failed' && break; sleep 1; done; echo "$s"
-          ./logos/bin/logoscore call monero_wallet_cli wallet_status
-          ./logos/bin/logoscore call monero_wallet_cli receive_info 0
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          for i in $(seq 1 40); do s=$(./logos/bin/logosctl call monero_wallet_cli job_status b1); echo "$s" | grep -qE 'done|failed' && break; sleep 1; done; echo "$s"
+          ./logos/bin/logosctl call monero_wallet_cli wallet_status
+          ./logos/bin/logosctl call monero_wallet_cli receive_info 0
         expect_contains: ['\"state\":\"done\"', '\"address\"']
 
   - title: "Addresses are validated locally, before anything reaches the engine"
     steps:
       - run: |
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
           # Bind each verdict to its address on ONE line: expect_contains is an unordered set of
           # substrings, so bare 'false' and 'true' tokens would pass even if swapped.
           # address_valid returns a real bool, so the reply is "result":false unquoted inside the
           # envelope; pull just that field out so the verdict is bound to its address.
-          verdict() { ./logos/bin/logoscore call monero_wallet_cli address_valid "$1" | sed 's/.*"result"://; s/,.*//'; }
+          verdict() { ./logos/bin/logosctl call monero_wallet_cli address_valid "$1" | sed 's/.*"result"://; s/,.*//'; }
           echo "bogus=$(verdict 5B8s3obCY2ETeQB3GNAGPK2zRGen5UeW1WzegSizVsmf6z5NvUsFuHSGgE7X1cz85oc1LPZfLKtF8QU8kBcHRUApQaHfYHm)"
           echo "stagenet=$(verdict 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY)"
         expect_contains: ['bogus=false', 'stagenet=true']
@@ -112,15 +110,15 @@ sections:
     steps:
       - title: "A fresh wallet has no funds, so the engine refuses the BUILD — its own words, not a role refusal"
         run: |
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_cli transfer 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY str:0.001
-          for i in $(seq 1 30); do s=$(./logos/bin/logoscore call monero_wallet_cli send_status s1); echo "$s" | grep -qE 'previewed|failed' && break; sleep 2; done; echo "$s"
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logosctl call monero_wallet_cli transfer 58hpBDxJrtPBPNQz9N2WbCU9CFe5ZsnHq1N2PqQERgHXH5iXv1CPyDeCS8XgkktngA3CfJCxZEE6QPsNwMThTpkb8RGkDgY str:0.001
+          for i in $(seq 1 30); do s=$(./logos/bin/logosctl call monero_wallet_cli send_status s1); echo "$s" | grep -qE 'previewed|failed' && break; sleep 2; done; echo "$s"
         expect_contains: ['\"requestId\":\"s1\"', 'not enough money']
       - title: "confirm is refused by STATE, which is only reachable because the role IS held"
         run: |
-          export LOGOSCORE_CONFIG_DIR="$PWD/session"
-          ./logos/bin/logoscore call monero_wallet_cli confirm s99
-          ./logos/bin/logoscore call monero_wallet_cli list
-          ./logos/bin/logoscore call monero_wallet_cli close_wallet
-          ./logos/bin/logoscore stop
+          export LOGOSCTL_CONFIG_DIR="$PWD/session"
+          ./logos/bin/logosctl call monero_wallet_cli confirm s99
+          ./logos/bin/logosctl call monero_wallet_cli list
+          ./logos/bin/logosctl call monero_wallet_cli close_wallet
+          ./logos/bin/logosctl daemon stop
         expect_contains: ['unknown requestId']
