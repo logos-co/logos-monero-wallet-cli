@@ -66,6 +66,7 @@ jobs:
 
       - name: Run doc-tests
         run: |
+          # The node, engine and backend pins are their "Use Tor for" PRs until those merge.
           nix run github:logos-co/logos-doctest -- run \
             doctests/monero-wallet-cli-headless.test.yaml \
             --verbose \

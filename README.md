@@ -80,6 +80,14 @@ Not built, deliberately: mining, multisig, proofs (`get_tx_key` / `check_tx_key`
 integrated addresses and the address book. Nothing here is offline signing — the engine signs when
 it **builds** the preview, and `confirm` governs **broadcast**.
 
+## Tor
+
+The wallet follows the node module's "Use Tor for" setting, which the wallet app asks for once;
+this module does not change it. A fresh install is **Only what identifies you**: the wallet
+catches up from a regular node, then moves to a node over Tor through `tor_module`, which must be
+staged beside the node module. Until that move, `transfer` answers `code: waiting_for_tor`.
+An install from before the setting keeps its routing. `wallet_status` shows the `route`.
+
 ## Arguments
 
 - **Passwords:** `@file` (out of shell history and `ps`) or `str:…`. Never bare — `1234` is coerced
