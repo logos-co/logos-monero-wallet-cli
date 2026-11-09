@@ -36,8 +36,8 @@ sections:
           ./logos/bin/logosctl module unload monero_node_module; sleep 1
           ./logos/bin/logosctl module load monero_wallet_cli
           sleep 2
-          ./logos/bin/logosctl call monero_node_module set_tor_use none
-          ./logos/bin/logosctl call monero_node_module tor_use
+          ./logos/bin/logosctl call monero_node_module set_tor_use stagenet none
+          ./logos/bin/logosctl call monero_node_module tor_use stagenet
         code_block: |
           nix build 'github:logos-co/logos-logoscore-cli#ctl-bundle-dir' --out-link ./logos
           for m in node-module wallet-core-module wallet-backend wallet-cli; do
